@@ -23,13 +23,13 @@
 
 
     <div>
-        <% todoarray.forEach((todo,index) => { %>
+        <% danger.forEach((todo,index) => { %>
            <p><%= todo.title %></p>
            <p><%= todo.content %></p>
-           <form action="/todo/delete/<%= index %>" method="post">
+           <form action="/todo/delete/<%= todo._id %>" method="post">
             <button>Delete</button>
            </form>
-           <form action="/todo/edit/<%= index %>" method="get">
+           <form action="/todo/edit/<%= todo._id %>" method="get">
             <button>Edit</button>
            </form>
         <% }) %>
