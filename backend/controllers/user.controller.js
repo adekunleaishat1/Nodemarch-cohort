@@ -1,6 +1,7 @@
 const usermodel = require("../model/user.model")
 const bcrypt = require("bcryptjs")
 const jwt  = require("jsonwebtoken")
+const cloudinary = require("../utils/cloudinary")
 
 const saltRound = 10
 
@@ -74,6 +75,28 @@ const verifyuser = async (req, res) =>{
   }
 }
 
+const uploadProfile = async (req, res) =>{
+  try {
+    console.log(req.body);
+    const {imagefile, email} = req.body
+    if (!imagefile) {
+      return res.status(401).json({message:"imagefile is mandatory", status:false})
+    }
+   const image =  await cloudinary.uploader.upload(imagefile)
+   console.log(image.secure_url);
+   
+  const updatedprofile = await usermodel.findOneAndUpdate(
+    {email},
+    {$set:{profilepic:image.secure_url}}
+  )
+    if (!updatedprofile) {
+      return res.status(403).json({message:"error updating profile", status:false})
+    }
+    return res.status(200).json({message:"profile updated successfully", status:true})
+  } catch (error) {
+    return res.status(500).json({message:error.message, status:false})
+  }
+}
+ 
 
-
-module.exports = {SignupUser, loginUser, verifyuser}
+module.exports = {SignupUser, loginUser, verifyuser,uploadProfile}
