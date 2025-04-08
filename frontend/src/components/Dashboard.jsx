@@ -8,6 +8,17 @@ const Dashboard = () => {
     const [data, setData] = useState()
     const [imagefile, setImagefile] = useState(null)
     useEffect(() => {
+     axios.get("http://localhost:6002/user/getproduct")
+     .then((res)=>{
+      console.log(res.data);
+      
+     }).catch((err)=>{
+      console.log(err);
+      
+     })
+    }, [])
+    
+    useEffect(() => {
         axios.get("http://localhost:6002/user/verify",{
           headers:{
             'Authorization': `Bearer ${token}`
@@ -47,6 +58,8 @@ const Dashboard = () => {
         console.log(err);
        })
     }
+
+
   return (
     <div>
       <h1>Welcome to your Dashboard {data && data.firstname}</h1>

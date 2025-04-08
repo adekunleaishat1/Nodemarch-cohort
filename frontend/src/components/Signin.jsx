@@ -33,7 +33,7 @@ const Signin = () => {
             <input onChange={(e)=> setUserdetail({...userdetail, password:e.target.value})} className='form-control' type="password" />
         </div>
         <div> 
-            <button onClick={Loginuser}>Register</button>
+            <button onClick={Loginuser}>Login</button>
         </div>
     </div>
     </div>

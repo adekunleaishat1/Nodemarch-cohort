@@ -2,6 +2,7 @@ const usermodel = require("../model/user.model")
 const bcrypt = require("bcryptjs")
 const jwt  = require("jsonwebtoken")
 const cloudinary = require("../utils/cloudinary")
+const productmodel = require("../model/product.model")
 
 const saltRound = 10
 
@@ -98,5 +99,48 @@ const uploadProfile = async (req, res) =>{
   }
 }
  
+const uploadProduct = async (req, res) =>{
+  try {
+    console.log(req.body);
+    const {productName, productPrice, productDescription, productCategory,productUrl} = req.body
+    if (!productCategory || !productDescription || !productName || !productPrice || !productUrl) {
+      return res.status(402).json({message:"All fields are mandatory", status:false})
+    }
+    
+   const allimage = await Promise.all( productUrl.map(async(imgeurl)=>{
+     const imagescu =  await cloudinary.uploader.upload(imgeurl)
+     return imagescu.secure_url
+     
+    }))
 
-module.exports = {SignupUser, loginUser, verifyuser,uploadProfile}
+    const uploaded =  await productmodel.create({
+      productName,
+      productCategory,
+      productPrice,
+      productDescription,
+      productImages:allimage
+    })
+    
+    if (!uploaded) {
+      return res.status(402).json({message:"Unable to upload product", status:false})
+    }
+    return res.status(200).json({message:"product uploaded successfully", status:true})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({message:error.message, status:false})
+  }
+}
+
+const getallproduct = async (req,res) =>{
+  try {
+    const allproduct = await productmodel.find()
+    if (allproduct) {
+      return res.status(200).json({message:"product fetched successfully", allproduct})
+    }
+  } catch (error) {
+    return res.status(500).json({message:error.message, status:false})
+
+  }
+}
+
+module.exports = {SignupUser, loginUser, verifyuser,uploadProfile, uploadProduct, getallproduct}
