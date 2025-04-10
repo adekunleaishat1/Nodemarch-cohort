@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 const jwt  = require("jsonwebtoken")
 const cloudinary = require("../utils/cloudinary")
 const productmodel = require("../model/product.model")
+const sendmail = require("../utils/mailer")
 
 const saltRound = 10
 
@@ -18,7 +19,7 @@ const SignupUser = async (req,res) =>{
       firstname, lastname, email, password:hashedPassword
     })
     console.log(createduser);
-    
+    await sendmail(email, firstname)
     if(!createduser){
         return  res.status(402).json({message:"An error occured while creating user", status:false})
     }
