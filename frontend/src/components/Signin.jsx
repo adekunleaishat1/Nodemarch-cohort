@@ -1,6 +1,6 @@
 import React,{useState} from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate , Link} from 'react-router-dom'
 
 const Signin = () => {
     const navigate = useNavigate()
@@ -35,6 +35,7 @@ const Signin = () => {
         <div> 
             <button onClick={Loginuser}>Login</button>
         </div>
+        <Link to="/forgotpassword">Forgot Password</Link>
     </div>
     </div>
   )

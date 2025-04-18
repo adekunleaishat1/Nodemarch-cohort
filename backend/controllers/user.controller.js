@@ -3,7 +3,9 @@ const bcrypt = require("bcryptjs")
 const jwt  = require("jsonwebtoken")
 const cloudinary = require("../utils/cloudinary")
 const productmodel = require("../model/product.model")
-const sendmail = require("../utils/mailer")
+const otpGenerate = require("../utils/otpgenerator")
+const otpmodel = require("../model/otp.model")
+const {sendmail, resetpasswordmail} = require("../utils/mailer")
 
 const saltRound = 10
 
@@ -144,4 +146,54 @@ const getallproduct = async (req,res) =>{
   }
 }
 
-module.exports = {SignupUser, loginUser, verifyuser,uploadProfile, uploadProduct, getallproduct}
+const forgotpassword = async (req, res) =>{
+  try {
+    const {email} = req.body
+    if (!email) {
+     return res.status(401).send({message:"input fields are mandatory", status:false})
+    }
+       const otp = otpGenerate()
+     const sendmail =  await  resetpasswordmail(email, otp)
+     if(!sendmail){
+      return res.status(403).send({message:"error occured", status:true}) 
+     }
+     await otpmodel.create({
+      email,
+      otp
+    })
+      return res.status(201).send({message:"mail sent successfully", status:true}) 
+  } catch (error) {
+    return res.status(500).send({message:error.message, status:false})
+  }
+}
+
+const resetpassword = async(req, res) =>{
+  console.log(req.body);
+   const {otp, newpassword} = req.body
+   try {
+    const user =  await otpmodel.findOne({otp:otp})
+    if (!user) {
+      return res.status(401).send({message:"Invalid otp", status:false}) 
+    }
+    console.log(user);
+
+  const hashedPassword =  await bcrypt.hash(newpassword.password, 10)
+  
+  const updateduser =  await usermodel.findOneAndUpdate(
+      {email:user.email},
+      {$set:{password:hashedPassword}},
+      {new:true}
+    )
+    
+    if (!updateduser) {
+      return res.status(403).send({message:"Unable to update password", status:false}) 
+    }
+    return res.status(201).send({message:"password reset successfully", status:true}) 
+
+   } catch (error) {
+    return res.status(500).send({message:error.message, status:false})
+    
+   }
+}
+
+module.exports = {SignupUser, loginUser, verifyuser,uploadProfile, uploadProduct, getallproduct, forgotpassword, resetpassword}
